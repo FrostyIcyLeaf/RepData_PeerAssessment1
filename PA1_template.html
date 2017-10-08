@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+
+<meta charset="utf-8" />
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="pandoc" />
+
+
+
+
+<title>Reproducible Research: Peer Assessment 1</title>
+
+<script src="PA1_template_files/jquery-1.11.3/jquery.min.js"></script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<link href="PA1_template_files/bootstrap-3.3.5/css/bootstrap.min.css" rel="stylesheet" />
+<script src="PA1_template_files/bootstrap-3.3.5/js/bootstrap.min.js"></script>
+<script src="PA1_template_files/bootstrap-3.3.5/shim/html5shiv.min.js"></script>
+<script src="PA1_template_files/bootstrap-3.3.5/shim/respond.min.js"></script>
+<script src="PA1_template_files/navigation-1.1/tabsets.js"></script>
+<link href="PA1_template_files/highlightjs-1.1/default.css" rel="stylesheet" />
+<script src="PA1_template_files/highlightjs-1.1/highlight.js"></script>
+
+<style type="text/css">code{white-space: pre;}</style>
+<style type="text/css">
+  pre:not([class]) {
+    background-color: white;
+  }
+</style>
+<script type="text/javascript">
+if (window.hljs && document.readyState && document.readyState === "complete") {
+   window.setTimeout(function() {
+      hljs.initHighlighting();
+   }, 0);
+}
+</script>
+
+
+
+<style type="text/css">
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+</style>
+
+
+</head>
+
+<body>
+
+<style type = "text/css">
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+</style>
+
+
+
+<div class="container-fluid main-container">
+
+<!-- tabsets -->
+<script>
+$(document).ready(function () {
+  window.buildTabsets("TOC");
+});
+</script>
+
+<!-- code folding -->
+
+
+
+
+
+
+<div class="fluid-row" id="header">
+
+
+
+<h1 class="title toc-ignore">Reproducible Research: Peer Assessment 1</h1>
+
+</div>
+
+
+<div id="getting-ready" class="section level2">
+<h2>Getting ready</h2>
+<p>The following code loads some of the libaries used in the project, namely <code>dplyr</code> to transform data and <code>lattice</code> for the lattice plotting system.</p>
+<pre class="r"><code>library(dplyr)</code></pre>
+<pre><code>## 
+## Attaching package: &#39;dplyr&#39;</code></pre>
+<pre><code>## The following objects are masked from &#39;package:stats&#39;:
+## 
+##     filter, lag</code></pre>
+<pre><code>## The following objects are masked from &#39;package:base&#39;:
+## 
+##     intersect, setdiff, setequal, union</code></pre>
+<pre class="r"><code>library(lattice)</code></pre>
+</div>
+<div id="loading-and-preprocessing-the-data" class="section level2">
+<h2>Loading and preprocessing the data</h2>
+<p>To start the explorative analysis the data in <code>activity.csv</code> is loaded into the <code>myData</code> data frame.</p>
+<pre class="r"><code>unzip(&quot;activity.zip&quot;, overwrite = TRUE)
+myData&lt;-read.csv(&quot;activity.csv&quot;)</code></pre>
+<p>Next the data in the column <code>date</code> is converted into the <code>Date</code> datatype using the <code>as.Date</code> function.</p>
+<pre class="r"><code>myData$date&lt;-as.Date(myData$date,&quot;%Y-%m-%d&quot;)</code></pre>
+<p>The data is now ready for analysis and processing.</p>
+</div>
+<div id="what-is-the-mean-total-number-of-steps-taken-per-day" class="section level2">
+<h2>What is the mean total number of steps taken per day?</h2>
+<p>First we answer the question what the total number of steps per day taken is. For that we use the <code>%&gt;%</code> operator to chain a few <code>dplyr</code> package commands together. We first group the data by the date and then sum the steps for each day and store the result in the <code>mySum</code> data frame.</p>
+<pre class="r"><code>mySum &lt;- myData %&gt;% group_by(date) %&gt;% summarise(sumsteps=sum(steps))</code></pre>
+<p>With the data in <code>mySum</code> we can draw a histogram of the <code>sumsteps</code></p>
+<pre class="r"><code>hist(mySum$sumsteps, col=&quot;red&quot;, xlab=&quot;Total steps&quot;, ylab=&quot;Frequency&quot;)</code></pre>
+<p><img src="PA1_template_files/figure-html/histogram-1.png" /><!-- --></p>
+<p>Furthermore we can calcuate both the mean and the median of the data set by ensuring to ignore <code>NA</code> values with the <code>na.rm = TRUE</code> option.</p>
+<pre class="r"><code>mean(mySum$sumsteps,na.rm = TRUE)</code></pre>
+<pre><code>## [1] 10766.19</code></pre>
+<pre class="r"><code>median(mySum$sumsteps,na.rm = TRUE)</code></pre>
+<pre><code>## [1] 10765</code></pre>
+</div>
+<div id="what-is-the-average-daily-activity-pattern" class="section level2">
+<h2>What is the average daily activity pattern?</h2>
+<p>Next we analyze the average daily activity pattern. We use the tools of <code>dplyr</code> and the <code>%&gt;%</code> command to calculate the average steps per interval by ignoring the <code>NA</code> values. The result is stored in data frame <code>myAvgSteps</code>. We use <code>xyplot</code> from the <code>lattice</code> package to plot the average steps over the interval length as line plot.</p>
+<pre class="r"><code>myAvgSteps &lt;- myData %&gt;% group_by(interval) %&gt;% summarise(avgSteps=mean(steps,na.rm=TRUE))
+xyplot(avgSteps ~ interval, data=myAvgSteps, type=&quot;l&quot;, xlab=&quot;Interval length&quot;, ylab=&quot;Average Steps&quot;)</code></pre>
+<p><img src="PA1_template_files/figure-html/dailyactivity-1.png" /><!-- --></p>
+<p>Next we find the maximum average daily activity interval.</p>
+<pre class="r"><code>myAvgSteps[which.max(myAvgSteps$avgSteps),]</code></pre>
+<pre><code>## # A tibble: 1 x 2
+##   interval avgSteps
+##      &lt;int&gt;    &lt;dbl&gt;
+## 1      835 206.1698</code></pre>
+</div>
+<div id="imputing-missing-values" class="section level2">
+<h2>Imputing missing values</h2>
+<p>Before imputing missing values in the data set we calculate the number of records in the daat set that have <code>NA</code> for the steps column.</p>
+<pre class="r"><code>sum(is.na(myData$steps))</code></pre>
+<pre><code>## [1] 2304</code></pre>
+<p>The startegy to impute the missing values is to take the mean of all records of the same interval accross all days and replace the <code>NA</code> value with the mean of that group. For that we first copy the data frame <code>myData</code> to a new data frame <code>myData2</code>. Next we use the function <code>ave</code> to calculate the average per group defined by the variable <code>interval</code> while ignoring the <code>NA</code> values. We assign the group-wise calculated mean of <code>NA</code> steps rows in the dataset to the <code>steps</code> variable with <code>NA</code> values.</p>
+<pre class="r"><code>myData2&lt;-myData
+myData2$steps[is.na(myData2$steps)]&lt;-ave(myData2$steps,myData2$interval,FUN=function(x) mean(x,na.rm = TRUE))[is.na(myData2$steps)]</code></pre>
+<p>Next we repeat the calculation of the total number of steps by grouping the new dataset by date. We use the newly calculated sum in data frame <code>mySum2</code> to recreate a histogram as before and recalulate both mean and median.</p>
+<pre class="r"><code>mySum2 &lt;- myData2 %&gt;% group_by(date) %&gt;% summarise(sumsteps=sum(steps))
+hist(mySum2$sumsteps, col=&quot;red&quot;, xlab=&quot;Total steps&quot;, ylab=&quot;Frequency&quot;)</code></pre>
+<p><img src="PA1_template_files/figure-html/summariseimputeddata-1.png" /><!-- --></p>
+<pre class="r"><code>mean(mySum2$sumsteps,na.rm = TRUE)</code></pre>
+<pre><code>## [1] 10766.19</code></pre>
+<pre class="r"><code>median(mySum2$sumsteps,na.rm = TRUE)</code></pre>
+<pre><code>## [1] 10766.19</code></pre>
+<p>We see that the histogram changes in having a higher frequency in the median. The mean and the median are now the same value. The imputing of the data has lead to the dataset be more ‘compacted’ towards the median. We can also see this by calculating the standard deviation from before imputing and after. The standard deviation of the data set after imputing is smaller than before.</p>
+<pre class="r"><code>sd(mySum$sumsteps,na.rm = TRUE)</code></pre>
+<pre><code>## [1] 4269.18</code></pre>
+<pre class="r"><code>sd(mySum2$sumsteps,na.rm = TRUE)</code></pre>
+<pre><code>## [1] 3974.391</code></pre>
+</div>
+<div id="are-there-differences-in-activity-patterns-between-weekdays-and-weekends" class="section level2">
+<h2>Are there differences in activity patterns between weekdays and weekends?</h2>
+<p>Finally we add a factor variable to the new data set <code>myData2</code> to indicate the weekday or weekend of the date. we add a factor with two levels and store it in the variable <code>wd</code>. We set the default variable to <code>weekday</code> and find all instance of the data where the <code>weekdays</code> function returns <code>Saturday</code> or <code>Sunday</code> and set the <code>wd</code> to <code>weekend</code>.</p>
+<pre class="r"><code>myData2$wd&lt;-factor(c(&quot;weekday&quot;,&quot;weekend&quot;))
+myData2$wd=&quot;weekday&quot;
+myData2[(weekdays(myData2$date)==&quot;Saturday&quot;) | (weekdays(myData2$date)==&quot;Sunday&quot;),4]&lt;-&quot;weekend&quot;</code></pre>
+<p>With this data we now use the <code>dplyr</code> tools to group the data by <code>wd</code> and <code>interval</code> and calculate the average steps per group before using <code>xyplot</code> from the <code>lattice</code> paqckage to plot a panel plot of average steps over interval lengths grouping teh data by the factor of weekday/weekend.</p>
+<pre class="r"><code>myAvgSteps2 &lt;- myData2 %&gt;% group_by(wd, interval) %&gt;% summarise(avgSteps=mean(steps,na.rm=TRUE))
+xyplot(avgSteps ~ interval | wd, data=myAvgSteps2, layout=c(1,2), type=&quot;l&quot;, xlab=&quot;Interval length&quot;, ylab=&quot;Average Steps&quot;)</code></pre>
+<p><img src="PA1_template_files/figure-html/panelplot-1.png" /><!-- --></p>
+<p>This concludes the anaylses for this project.</p>
+</div>
+
+
+
+
+</div>
+
+<script>
+
+// add bootstrap table styles to pandoc tables
+function bootstrapStylePandocTables() {
+  $('tr.header').parent('thead').parent('table').addClass('table table-condensed');
+}
+$(document).ready(function () {
+  bootstrapStylePandocTables();
+});
+
+
+</script>
+
+<!-- dynamically load mathjax for compatibility with self-contained -->
+<script>
+  (function () {
+    var script = document.createElement("script");
+    script.type = "text/javascript";
+    script.src  = "https://mathjax.rstudio.com/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML";
+    document.getElementsByTagName("head")[0].appendChild(script);
+  })();
+</script>
+
+</body>
+</html>
